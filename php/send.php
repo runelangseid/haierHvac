@@ -1,5 +1,50 @@
 <?php 
 
+$rleLengthMax = 78;
+
+if ( count( $argv) < 3 )
+{
+    echo "Wrong parameter. Usage: ./send.php config command\n";
+    echo "Example: ./send.php haier 23\n";
+}
+
+$config = $argv[1];
+$command = $argv[2];
+$codes = array();
+
+$configFile = getcwd() . "/config/$config.php";
+include( $configFile );
+include( "lib/rle.php" );
+
+if ( !$codes )
+{
+    echo "No codes loaded from config: $configFile\n";
+    exit(40);
+}
+
+if ( !array_key_exists( $command, $codes ) )
+{
+    echo "Code \"$command\" not fount in config: $configFile\n";
+    exit(41);
+}
+
+$rle = Rle::encode( $codes[$command] );
+$rleLength =  strlen( $rle );
+if ( $rleLength > $rleLengthMax )
+{
+    echo "Code \"$command\" found to be too long for tdtool raw format. Max $rleLengthMax char. Currently $rleLength\n";
+    exit(42);    
+}
+
+$exec = "echo \"S$rle}+\" | tdtool --raw -";
+exec( $exec, $a, $errCode );
+
+// @todo Check error code, 6 is failed ?
+//var_dump( "err", $err );
+
+exit();
+
+
 $raw = array( 3050,3000,3050,4400,550,1650,600,500,600,1600,600,500,600,550,550,1650,550,1650,550,550,550,1650,550,550,550,550,550,1650,550,550,550,550,600,1600,600,500,600,1600,600,1600,600,550,550,550,550,550,550,550,600,1600,550,550,600,500,600,550,550,550,550,550,550,550,600,500,600,500,600,500,600,500,600,1600,600,550,550,550,550,550,600,1600,550,550,550,550,600,550,550,1600,600,1600,600,550,550,550,550,550,600,500,600,500,600,1600,600,500,600,500,600,550,550,550,550,550,550,550,550,550,600,1600,600,500,600,550,450,650,550,550,600,500,600,500,600,500,600,500,600,550,550,550,550,550,550,550,600,500,600,500,600,550,550,550,550,550,550,550,550,550,550,550,600,500,600,500,600,550,550,550,600,500,600,550,550,500,600,500,600,550,550,550,550,550,500,600,600,500,600,500,600,550,550,550,550,550,550,550,550,550,550,550,600,500,600,550,550,550,500,600,600,500,600,500,600,550,550,1600,600,550,550,550,550,1650,550,1650,550,1650,550,1600,600,550,500 );
 // replaced 500 & 600 with 550,
 // replaced 1550 & 1650 with 1600,
