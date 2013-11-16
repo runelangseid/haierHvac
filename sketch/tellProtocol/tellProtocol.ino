@@ -2,11 +2,19 @@
 
 /* Raspberry
  * 
- * echo "SZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ}+" | tdtool --raw -
- * echo "SZZZ####ZZZZ####}+" | tdtool --raw -
+ * echo 'SZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ}+' | tdtool --raw -
+ * echo 'S$k$k$k$+' | tdtool --raw -
  *
  * check RCSwitch.cpp
  *
+ * Send/Receive
+ * - PHP - send fra dec 32 (SPACE). Øk med 5 for hvert tegn. Gir oss 19 tegn.
+ * - 1234567890 ABCDEFGHI
+ *
+
+flagg
+0:12220,1:944,2:864,3:904,4:528,5:748,6:348,7:624,8:484,9:456,10:652,11:572,12:520,13:1588,14:484,15:772,16:380,17:672,18:428,19:492,20:556,21:808,22:260,23:672,24:432,25:560,26:504,27:612,28:540,29:752,30:336,31:492,32:460,33:540,34:528,35:652,36:2676,37:112,38:32,39:0,40:0,41:0,42:0,43:0,44:0,45:0,46:0,47:0,48:0,49:0,50:0,51:0,52:0,53:0,54:0,55:0,56:0,57:0,58:0,59:0,60:0,61:0,62:0,63:0,64:0,65:0,66:0,67:0,68:0,69:0,70:0,71:0,72:0,73:0,74:0,75:0,76:0,77:0,
+
  */
 
 #define RCSWITCH_MAX_CHANGES 67
@@ -18,6 +26,7 @@ volatile int state = LOW;
 volatile int state2 = LOW;
 
 volatile unsigned int changeCount;
+volatile unsigned int changeCountP;
 
 volatile unsigned int duration;
 volatile unsigned int highDuration;
@@ -27,6 +36,7 @@ volatile unsigned int preamble;
 volatile unsigned int receivedData;
 
 unsigned int timings[MAX_CHANGES];
+unsigned int timingsP[MAX_CHANGES];
 
 void setup()
 {
@@ -50,7 +60,7 @@ void loop()
       {
         Serial.print(i);
         Serial.print(":");
-        Serial.print(timings[i]);
+        Serial.print(timingsP[i]);
         Serial.print(",");
       }
       Serial.println("");
@@ -58,7 +68,7 @@ void loop()
       Serial.println("");
 
       Serial.println("changeCount:");
-      Serial.println(changeCount);
+      Serial.println(changeCountP);
       Serial.println("");
 
       flag = false;
@@ -116,8 +126,8 @@ bool receiveProtocol1(unsigned int changeCount){
 
 bool checkPreamble(int changeCount)
 {
-  int l = 500;
-  int h = 1600;
+  int l = 800;
+  int h = 1100;
   int retVal = false;
 
   if (timings[1] > l && timings[1] < h )
@@ -148,6 +158,9 @@ bool checkPreamble(int changeCount)
     //RCSwitch::nReceivedDelay = delay;
     //RCSwitch::nReceivedProtocol = 1;
     receivedData = true;
+    memcpy( timingsP, timings, MAX_CHANGES );
+    changeCountP = changeCount;
+
   }
 
   return retVal;  
@@ -162,15 +175,16 @@ void blink()
 
   duration = time - lastTime;
 
- 
 
-  //if (duration > 5000 && duration > RCSwitch::timings[0] - 200 && duration < RCSwitch::timings[0] + 200) {
   //if (duration > 5000 && duration > timings[0] - 2000 && duration < timings[0] + 2000)
-  if (duration > 4000 && duration > timings[0] - 2000 && duration < timings[0] + 2000)
+  //if (duration > 7000 && duration > timings[0] - 2000 && duration < timings[0] + 2000)
+  if (duration > 7000)
   {
+    state = !state;
+
     repeatCount++;
     changeCount--;
-    if (repeatCount == 1) {
+    if (repeatCount == 2) {
       if (checkPreamble(changeCount) == false){
         //failed
       }
@@ -178,12 +192,11 @@ void blink()
     }
     changeCount = 0;
   }
-  else if (duration > 4000)
+  else if (duration > 7000)
   {
     changeCount = 0;
   }
 
- 
 
   if (changeCount >= RCSWITCH_MAX_CHANGES)
   {
@@ -191,33 +204,9 @@ void blink()
     repeatCount = 0;
   }
 
-  //RCSwitch::timings[changeCount++] = duration;
-  timings[changeCount++] = duration;
-  lastTime = time;  
-
-  return;
-
-  //if (duration > 5000 && duration > RCSwitch::timings[0] - 200 && duration < RCSwitch::timings[0] + 200) {
-  if (duration > 5000)
-  {
-    //repeatCount++;
-    //changeCount--;
-
-    // @todo 60 is bogus...
-    if ( changeCount >= 3 )
-    {
-      if ( checkPreamble(changeCount) )
-      {
-        preamble = true;
-        state2 = !state2;
-      }
-    }
-  }
-  
-
-  state = !state;
   timings[changeCount++] = duration;
   lastTime = time;
+
 }
 
 
