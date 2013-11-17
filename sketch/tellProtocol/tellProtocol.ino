@@ -198,7 +198,7 @@ void blink()
   }
 
 
-  if (changeCount >= RCSWITCH_MAX_CHANGES)
+  if (changeCount >= MAX_CHANGES)
   {
     changeCount = 0;
     repeatCount = 0;
