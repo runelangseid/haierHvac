@@ -40,11 +40,11 @@ if ( $rleLength > $rleLengthMax )
 $rleC = Rle::convert( $rle );
 if ( $debug )
 {
-    echo "Before: $rleC\n";    
-    echo "After : $rle\n\n";    
+    echo "Before: $rle\n";    
+    echo "After : $rleC\n\n";    
 }
 
-$exec = "echo \"SZZZ$rle}+\" | tdtool --raw -";
+$exec = "echo \"SZZZ$rleC+\" | tdtool --raw -";
 exec( $exec, $a, $errCode );
 
 // @todo Check error code, 6 is failed ?
