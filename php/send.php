@@ -10,6 +10,7 @@ if ( count( $argv) < 3 )
 
 $config = $argv[1];
 $command = $argv[2];
+$debug = true;
 $codes = array();
 
 $configFile = getcwd() . "/config/$config.php";
@@ -36,7 +37,14 @@ if ( $rleLength > $rleLengthMax )
     exit(42);    
 }
 
-$exec = "echo \"S$rle}+\" | tdtool --raw -";
+$rleC = Rle::convert( $rle );
+if ( $debug )
+{
+    echo "Before: $rleC\n";    
+    echo "After : $rle\n\n";    
+}
+
+$exec = "echo \"SZZZ$rle}+\" | tdtool --raw -";
 exec( $exec, $a, $errCode );
 
 // @todo Check error code, 6 is failed ?

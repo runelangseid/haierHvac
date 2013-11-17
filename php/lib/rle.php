@@ -4,7 +4,6 @@ class Rle
 {
     public static function encode( $raw, $asString = true )
     {
-
         $rawEncoded = array();
 
         $u = array_unique( $raw );
@@ -65,5 +64,52 @@ class Rle
             $s .= $r;
         }
         return $s;
+    }
+
+    /* Convert rle to someting we can send via the tellstick protocol (raw)
+     * @param String rle converted string
+     * @return Converted string
+     */
+    public static function convert( $str )
+    {
+        $r = array();
+
+        $k = array( 'A' => '#',
+                    'B' => '(',
+                    'C' => '-',
+                    'D' => '2',
+                    'E' => '7',
+                    'F' => '<',
+                    'G' => 'A',
+                    'H' => 'F',
+                    'I' => 'K' );
+
+        $numbers = array( '1' => 'P',  // ascii 80
+                          '2' => 'U',  // acsii 85
+                          '3' => 'Z',
+                          '4' => '_',
+                          '5' => 'd',
+                          '6' => 'i',
+                          '7' => 'n',
+                          '8' => 's',
+                          '9' => 'x',
+                          '0' => '}',
+                    );
+
+        $chars = str_split($str);
+        foreach( $chars as $c )
+        {
+            if ( array_key_exists( $c, $k ) )
+            {
+                $r[] = $k[$c];
+            }
+            elseif ( array_key_exists( $c, $numbers ) )
+            {
+                $r[] = $numbers[$c];
+            }
+
+        }
+
+        return implode( "", $r );
     }
 }
