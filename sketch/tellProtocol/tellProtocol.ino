@@ -11,7 +11,34 @@
  * - PHP - send fra dec 32 (SPACE). Øk med 5 for hvert tegn. Gir oss 19 tegn.
  * - 1234567890 ABCDEFGHI
  *
-
+ *
+ * Conversion table for keys
+ * http://no.wikipedia.org/wiki/ASCII
+ *
+ Status
+ 
+ skissa tar i mot light fra openhab
+ - utvikle skissa til å decode mottatt data
+ 
+ * Numbers    (ASCII * 10)  char
+ * 1          320           P
+ * 2          400 Z
+ * 3          480          d
+ * 4          560          n
+ * 5          640          
+ * 6          720
+ * 7          800
+ * 8          880
+ * 9          960
+ * 0          104
+ *
+ * A          112
+ * B          120
+ * C          127
+ *
+ *
+ *
+ *
 flagg
 0:12220,1:944,2:864,3:904,4:528,5:748,6:348,7:624,8:484,9:456,10:652,11:572,12:520,13:1588,14:484,15:772,16:380,17:672,18:428,19:492,20:556,21:808,22:260,23:672,24:432,25:560,26:504,27:612,28:540,29:752,30:336,31:492,32:460,33:540,34:528,35:652,36:2676,37:112,38:32,39:0,40:0,41:0,42:0,43:0,44:0,45:0,46:0,47:0,48:0,49:0,50:0,51:0,52:0,53:0,54:0,55:0,56:0,57:0,58:0,59:0,60:0,61:0,62:0,63:0,64:0,65:0,66:0,67:0,68:0,69:0,70:0,71:0,72:0,73:0,74:0,75:0,76:0,77:0,
 
@@ -56,9 +83,9 @@ void loop()
   if (receivedData)
   {
       Serial.println("flagg");
-      for (int i=0;i<MAX_CHANGES;i++)
+      for (int i=4;i<changeCountP+1;i++)
       {
-        Serial.print(i);
+        Serial.print(i-4);
         Serial.print(":");
         Serial.print(timingsP[i]);
         Serial.print(",");
@@ -67,8 +94,8 @@ void loop()
       Serial.println(highDuration);
       Serial.println("");
 
-      Serial.println("changeCount:");
-      Serial.println(changeCountP);
+      Serial.println("chars received:");
+      Serial.println(changeCountP-3);
       Serial.println("");
 
       flag = false;

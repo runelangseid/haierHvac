@@ -74,27 +74,23 @@ class Rle
     {
         $r = array();
 
-        $k = array( 'A' => '#',
-                    'B' => '(',
-                    'C' => '-',
-                    'D' => '2',
-                    'E' => '7',
-                    'F' => '<',
-                    'G' => 'A',
-                    'H' => 'F',
-                    'I' => 'K' );
-
-        $numbers = array( '1' => 'P',  // ascii 80
-                          '2' => 'U',  // acsii 85
-                          '3' => 'Z',
-                          '4' => '_',
-                          '5' => 'd',
-                          '6' => 'i',
-                          '7' => 'n',
-                          '8' => 's',
-                          '9' => 'x',
-                          '0' => '}',
+        $numbers = array( '1' => chr(32),   // SPACE ascii 80, increase by 8
+                          '2' => chr(40),   // (
+                          '3' => chr(48),   // 0
+                          '4' => chr(56),   // 8
+                          '5' => chr(64),   // @
+                          '6' => chr(72),   // H
+                          '7' => chr(80),   // P
+                          '8' => chr(88),   // X
+                          '9' => chr(97),   // a   - special, increase of 9
+                          '0' => chr(104),  // h
                     );
+
+    $k = array( 'A' => chr(112),
+                'B' => chr(120),
+                'C' => chr(127),
+              );
+
 
         $chars = str_split($str);
         foreach( $chars as $c )
