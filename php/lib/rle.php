@@ -74,22 +74,22 @@ class Rle
     {
         $r = array();
 
-        $numbers = array( '1' => chr(32),   // SPACE ascii 80, increase by 8
-                          '2' => chr(40),   // (
-                          '3' => chr(48),   // 0
-                          '4' => chr(56),   // 8
-                          '5' => chr(64),   // @
-                          '6' => chr(72),   // H
-                          '7' => chr(80),   // P
-                          '8' => chr(88),   // X
-                          '9' => chr(97),   // a   - special, increase of 9
-                          '0' => chr(104),  // h
+        $numbers = array( '1' => chr(32),   // SPACE ascii 32, increase by 8      220-359
+                          '2' => chr(40),   // (                                  360-439
+                          '3' => chr(48),   // 0                                  440-519
+                          '4' => chr(56),   // 8                                  520-599
+                          '5' => chr(64),   // @                                  600-679
+                          '6' => chr(72),   // H                                  680-759
+                          '7' => chr(80),   // P                                  760-839
+                          '8' => chr(88),   // X                                  840-919
+                          '9' => chr(97),   // a   - special, increase of 9       920-999
+                          '0' => chr(104),  // h                                 1000-1079
                     );
 
-    $k = array( 'A' => chr(112),
-                'B' => chr(120),
-                'C' => chr(127),
-              );
+        $k =       array( 'A' => chr(112),  // p                                  1080-1159
+                          'B' => chr(120),  // x                                  1160-1239
+                          'C' => chr(126),  // ~                                  1240-1319
+                        );
 
 
         $chars = str_split($str);
