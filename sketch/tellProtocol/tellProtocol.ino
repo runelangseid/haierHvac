@@ -38,7 +38,7 @@
  *
  */
 
-#define RCSWITCH_MAX_CHANGES 67
+//#define RCSWITCH_MAX_CHANGES 67
 
 const int MAX_CHANGES = 78;
 int pin = 13;
@@ -70,14 +70,25 @@ void setup()
 
 void loop()
 {
-
   digitalWrite(pin, state);
+
+  char r;
+  int errorsC = 0;
+  unsigned int errors[MAX_CHANGES];
+  unsigned int errorsT[MAX_CHANGES];
 
   if (receivedData)
   {
       Serial.println("flagg");
       for (int i=4;i<changeCountP+1;i++)
       {
+        r = decode( timingsP[i] );
+        if ( r == 'Z' )
+        {
+          errors[errorsC] = i;
+          errorsT[errorsC++] = timingsP[i];
+        }
+
         Serial.print(i-4);
         Serial.print(":");
         Serial.print(timingsP[i]);
@@ -90,8 +101,18 @@ void loop()
       {
         Serial.print( decode( timingsP[i] ));
       }
-      Serial.println("");
 
+      Serial.println("");
+      Serial.println("Errors identified:");
+      for (int i=0;i<errorsC;i++)
+      {
+        Serial.print( errors[i] );
+        Serial.print( ":" );
+        Serial.print( errorsT[i] );
+        Serial.print( "," );
+      }
+
+      Serial.println("");
       Serial.println("chars received:");
       Serial.println(changeCountP-3);
       Serial.println("");
@@ -113,30 +134,30 @@ char decode(int v)
 {
   if ( v > 240 && v < 359 )
     return '1';
-  else if ( v > 360 && v < 439 )
+  else if ( v >= 360 && v < 440 )
     return '2';
-  else if ( v > 440 && v < 519 )
+  else if ( v >= 440 && v < 520 )
     return '3';
-  else if ( v > 520 && v < 599 )
+  else if ( v >= 520 && v < 600 )
     return '4';
-  else if ( v > 600 && v < 679 )
+  else if ( v >= 600 && v < 680 )
     return '5';
-  else if ( v > 680 && v < 759 )
+  else if ( v >= 680 && v < 760 )
     return '6';
-  else if ( v > 760 && v < 839 )
+  else if ( v >= 760 && v < 840 )
     return '7';
-  else if ( v > 840 && v < 919 )
+  else if ( v >= 840 && v < 920 )
     return '8';
-  else if ( v > 920 && v < 999 )
+  else if ( v >= 920 && v < 1000 )
     return '9';
-  else if ( v > 1000 && v < 1079 )
+  else if ( v >= 1000 && v < 1080 )
     return '0';
 
-  else if ( v > 1080 && v < 1159 )
+  else if ( v >= 1080 && v < 1160 )
     return 'A';
-  else if ( v > 1160 && v < 1239 )
+  else if ( v >= 1160 && v < 1240 )
     return 'B';
-  else if ( v > 1240 && v < 1319 )
+  else if ( v >= 1240 && v < 1320 )
     return 'C';
 
   return 'Z';
@@ -173,7 +194,7 @@ bool checkPreamble(int changeCount)
   if (retVal)
   {
     receivedData = true;
-    memcpy( timingsP, timings, MAX_CHANGES );
+    memcpy( timingsP, timings, sizeof(timingsP) );
     changeCountP = changeCount;
 
   }
