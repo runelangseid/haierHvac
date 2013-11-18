@@ -4,6 +4,8 @@ class Rle
 {
     public static function encode( $raw, $asString = true )
     {
+        $raw = self::cleanup( $raw );
+
         $rawEncoded = array();
 
         $u = array_unique( $raw );
@@ -108,4 +110,23 @@ class Rle
 
         return implode( "", $r );
     }
+
+    public static function cleanup( $data )
+    {
+        $r = array();
+        foreach ( $data as $a )
+        {
+            if ( $a > 1000 )
+            {
+                $r[] = 550;
+            }
+            else
+            {
+                $r[] = 1600;
+            }
+        }
+
+        return $r;
+    }
+
 }
