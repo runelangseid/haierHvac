@@ -132,32 +132,32 @@ Z gir rett 900 micros (0.9millis)
 
 char decode(int v)
 {
-  if ( v > 240 && v < 359 )
+  if ( v > 50 && v < 150 )
     return '1';
-  else if ( v >= 360 && v < 440 )
+  else if ( v >= 150 && v < 250 )
     return '2';
-  else if ( v >= 440 && v < 520 )
+  else if ( v >= 250 && v < 350 )
     return '3';
-  else if ( v >= 520 && v < 600 )
+  else if ( v >= 350 && v < 450 )
     return '4';
-  else if ( v >= 600 && v < 680 )
+  else if ( v >= 450 && v < 550 )
     return '5';
-  else if ( v >= 680 && v < 760 )
+  else if ( v >= 550 && v < 650 )
     return '6';
-  else if ( v >= 760 && v < 840 )
+  else if ( v >= 650 && v < 750 )
     return '7';
-  else if ( v >= 840 && v < 920 )
+  else if ( v >= 750 && v < 850 )
     return '8';
-  else if ( v >= 920 && v < 1000 )
+  else if ( v >= 850 && v < 950 )
     return '9';
-  else if ( v >= 1000 && v < 1080 )
+  else if ( v >= 950 && v < 1050 )
     return '0';
 
-  else if ( v >= 1080 && v < 1160 )
+  else if ( v >= 1050 && v < 1150 )
     return 'A';
-  else if ( v >= 1160 && v < 1240 )
+  else if ( v >= 1150 && v < 1250 )
     return 'B';
-  else if ( v >= 1240 && v < 1320 )
+  else if ( v >= 1250 && v < 3250 )
     return 'C';
 
   return 'Z';
