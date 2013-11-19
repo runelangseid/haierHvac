@@ -76,23 +76,22 @@ class Rle
     {
         $r = array();
 
-        $numbers = array( '1' => chr(9),   //  x0A does not work with tdtool
-                          '2' => chr(20),   // 
-                          '3' => chr(30),   // 
-                          '4' => chr(40),   // 
-                          '5' => chr(50),   // 
-                          '6' => chr(60),   // 
-                          '7' => chr(70),   // 
-                          '8' => chr(80),   // 
-                          '9' => chr(90),   // 
-                          '0' => chr(100),  // 
-                    );
-
-        $k =       array( 'A' => chr(110),  // 
-                          'B' => chr(120),  // 
+        $k =       array( 'A' => chr(9),    // 
+                          'B' => chr(20),   // 
                           'C' => chr(127),  // 
                         );
 
+        $numbers = array( '1' => chr(30),   //  x0A does not work with tdtool
+                          '2' => chr(40),   // 
+                          '3' => chr(50),   // 
+                          '4' => chr(60),   // 
+                          '5' => chr(70),   // 
+                          '6' => chr(80),   // 
+                          '7' => chr(90),   // 
+                          '8' => chr(100),  // 
+                          '9' => chr(110),  // 
+                          '0' => chr(120),  // 
+                    );
 
         $chars = str_split($str);
         foreach( $chars as $c )
