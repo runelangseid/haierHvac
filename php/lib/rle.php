@@ -76,7 +76,7 @@ class Rle
     {
         $r = array();
 
-        $numbers = array( '1' => '\x0A',   // 
+        $numbers = array( '1' => '\x09',   //  x0A does not work with tdtool
                           '2' => '\x14',   // 
                           '3' => '\x1E',   // 
                           '4' => '\x28',   // 
