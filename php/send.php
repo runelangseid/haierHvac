@@ -45,7 +45,7 @@ if ( $debug )
     echo "Lenght: $rleLength\n\n";
 }
 
-$exec = "echo -e \"SZZZ$rleC+\" | tdtool --raw -";
+$exec = "echo -e \"SHAR$rleC+\" | tdtool --raw -";
 exec( $exec, $a, $errCode );
 
 // @todo Check error code, 6 is failed ?

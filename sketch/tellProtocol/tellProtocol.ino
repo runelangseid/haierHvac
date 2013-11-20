@@ -15,30 +15,7 @@
  * Conversion table for keys
  * http://no.wikipedia.org/wiki/ASCII
  *
- Status
- 
- skissa tar i mot light fra openhab
- - utvikle skissa til å decode mottatt data
- 
- * Numbers    (ASCII * 10)  char
- * 1          320           P
- * 2          400 Z
- * 3          480          d
- * 4          560          n
- * 5          640          
- * 6          720
- * 7          800
- * 8          880
- * 9          960
- * 0          104
- *
- * A          112
- * B          120
- * C          127
- *
- */
-
-//#define RCSWITCH_MAX_CHANGES 67
+*/
 
 const int MAX_CHANGES = 78;
 int pin = 13;
@@ -64,7 +41,7 @@ void setup()
   Serial.println("START");
 
   pinMode(pin, OUTPUT);
-  attachInterrupt(0, blink, CHANGE);
+  attachInterrupt(0, handleInterrupt, CHANGE);
 
 }
 
@@ -123,12 +100,6 @@ void loop()
   }
 }
 
-/*
-Z gir rett 900 micros (0.9millis)
-
-
-
-*/
 
 char decode(int v)
 {
@@ -164,27 +135,20 @@ char decode(int v)
 }
 
 
-
-bool checkPreamble(int changeCount)
+/* Check for Haier code - starts with letters H A R
+ *
+ */
+bool receiveHaier(int changeCount)
 {
-  int l = 800;
-  int h = 1100;
   int retVal = false;
 
-  if (timings[1] > l && timings[1] < h )
+  // Check for letters HAR
+  if (timings[1] > 650 && timings[1] < 780 )
   {
-    if (timings[2] > l && timings[2] < h )
+    if (timings[2] > 600 && timings[2] < 700 )
     {
-      if (timings[3] > l && timings[3] < h )
+      if (timings[3] > 770 && timings[3] < 870 )
       {
-        /*for (int i=0;i<changeCount;i++)
-        {
-          if (timings[i] > 3000 )
-          {
-            //return false;
-          }
-        }
-        */
         retVal = true;
       }
     }
@@ -202,7 +166,10 @@ bool checkPreamble(int changeCount)
   return retVal;  
 }
 
-void blink()
+/* Interrupt routine
+ *
+ */
+void handleInterrupt()
 {
   static unsigned int duration;
   static unsigned long lastTime;
@@ -220,19 +187,20 @@ void blink()
 
     repeatCount++;
     changeCount--;
-    if (repeatCount == 2) {
-      if (checkPreamble(changeCount) == false){
+    if (repeatCount == 2)
+      {
+      if (receiveHaier(changeCount) == false)
+      {
         //failed
       }
       repeatCount = 0;
     }
     changeCount = 0;
   }
-  else if (duration > 7000)
+  /*else if (duration > 7000)
   {
     changeCount = 0;
-  }
-
+  }*/
 
   if (changeCount >= MAX_CHANGES)
   {
