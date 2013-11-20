@@ -46,10 +46,11 @@ if ( $debug )
 }
 
 $exec = "echo -e \"SHAR$rleC+\" | tdtool --raw -";
-exec( $exec, $a, $errCode );
+exec( $exec, $output, $errCode );
 
 // @todo Check error code, 6 is failed ?
-//var_dump( "err", $err );
+//var_dump( "errCode", $errCode );
+//var_dump( "output", $output );
 
 exit();
 
