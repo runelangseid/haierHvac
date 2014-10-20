@@ -40,7 +40,7 @@ unsigned int timingsP[MAX_CHANGES];
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.println("START");
 
   pinMode(pin, OUTPUT);
@@ -136,6 +136,9 @@ bool checkPreamble(int changeCount)
     {
       if (timings[3] > l && timings[3] < h )
       {
+
+        Serial.println("pre OK");
+
         /*for (int i=0;i<changeCount;i++)
         {
           if (timings[i] > 3000 )
