@@ -1,134 +1,69 @@
 
-
-/* Raspberry
- * 
- * echo 'SZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ}+' | tdtool --raw -
- * echo 'S$k$k$k$+' | tdtool --raw -
+/** Arduino HVAC wireless IR transmitter
+ * Connect wireless 433.92mhz to D2 - Interrupt 1 on UNO
  *
- * check RCSwitch.cpp
+ * Notes
+ * - tdtool sends a raw command 10 times
  *
- * Send/Receive
- * - PHP - send fra dec 32 (SPACE). Øk med 5 for hvert tegn. Gir oss 19 tegn.
- * - 1234567890 ABCDEFGHI
  *
-
-flagg
-0:12220,1:944,2:864,3:904,4:528,5:748,6:348,7:624,8:484,9:456,10:652,11:572,12:520,13:1588,14:484,15:772,16:380,17:672,18:428,19:492,20:556,21:808,22:260,23:672,24:432,25:560,26:504,27:612,28:540,29:752,30:336,31:492,32:460,33:540,34:528,35:652,36:2676,37:112,38:32,39:0,40:0,41:0,42:0,43:0,44:0,45:0,46:0,47:0,48:0,49:0,50:0,51:0,52:0,53:0,54:0,55:0,56:0,57:0,58:0,59:0,60:0,61:0,62:0,63:0,64:0,65:0,66:0,67:0,68:0,69:0,70:0,71:0,72:0,73:0,74:0,75:0,76:0,77:0,
-
+ * First three Z's are ignored (used as preamble)
+ * Next, use Z as logic 1, \20x as logic 0
+ * Z is 900, \20x is > 100
+ *
+ * Received value is 128 - echo -e "SZZZZ\x20\x20\x20\x20\x20\x20\x20+" | tdtool --raw - 2>&1
+ *
+ * Bugs
+ * - first transmission after successfull retrieval submit value again
+ * - preamble does not work correctly / other things gets through
+ * - better handling of repeated codes within 1(?) seconds
+ *
  */
 
-#define RCSWITCH_MAX_CHANGES 67
-
 const int MAX_CHANGES = 78;
-int pin = 13;
-
-volatile int state = LOW;
-volatile int state2 = LOW;
-
-volatile unsigned int changeCount;
-volatile unsigned int changeCountP;
 
 volatile unsigned int duration;
 volatile unsigned int highDuration;
-volatile unsigned int flag;
-volatile unsigned int preamble;
-
-volatile unsigned int receivedData;
+volatile unsigned int start;
 
 unsigned int timings[MAX_CHANGES];
-unsigned int timingsP[MAX_CHANGES];
+
+volatile int nReceivedValue;
+volatile int nReceivedBitlength;
+volatile int nReceivedDelay;
+volatile int nReceivedProtocol = 0;
+
 
 void setup()
 {
-  Serial.begin(115200);
+  Serial.begin(9600);
   Serial.println("START");
 
-  pinMode(pin, OUTPUT);
-  attachInterrupt(0, blink, CHANGE);
+  // Setup interrupt routine
+  attachInterrupt(0, handleInterrupt, CHANGE);
 
 }
 
 void loop()
 {
-
-  digitalWrite(pin, state2);
-
-  if (receivedData)
+  if (nReceivedProtocol == 1)
   {
-      Serial.println("flagg");
-      for (int i=0;i<MAX_CHANGES;i++)
-      {
-        Serial.print(i);
-        Serial.print(":");
-        Serial.print(timingsP[i]);
-        Serial.print(",");
-      }
-      Serial.println("");
-      Serial.println(highDuration);
-      Serial.println("");
+      Serial.print("nReceivedValue:");
+      Serial.println(nReceivedValue);
 
-      Serial.println("changeCount:");
-      Serial.println(changeCountP);
-      Serial.println("");
-
-      flag = false;
-      preamble = false;
-      receivedData = false;
+      nReceivedProtocol = 0;
+      nReceivedBitlength = 0;
+      nReceivedValue = 0;
   }
 }
 
-/*
-Z gir rett 900 micros (0.9millis)
-
-
-
-*/
-
-bool protocol(int changeCount)
-{
-}
-
-
-/*
-bool receiveProtocol1(unsigned int changeCount){
-      unsigned long code = 0;
-      unsigned long delay = RCSwitch::timings[0] / 31;
-      unsigned long delayTolerance = delay * RCSwitch::nReceiveTolerance * 0.01;    
-      for (int i = 1; i<changeCount ; i=i+2) {
-          if (RCSwitch::timings[i] > delay-delayTolerance && RCSwitch::timings[i] < delay+delayTolerance && RCSwitch::timings[i+1] > delay*3-delayTolerance && RCSwitch::timings[i+1] < delay*3+delayTolerance) {
-            code = code << 1;
-          } else if (RCSwitch::timings[i] > delay*3-delayTolerance && RCSwitch::timings[i] < delay*3+delayTolerance && RCSwitch::timings[i+1] > delay-delayTolerance && RCSwitch::timings[i+1] < delay+delayTolerance) {
-            code+=1;
-            code = code << 1;
-          } else {
-            // Failed
-            i = changeCount;
-            code = 0;
-          }
-      }      
-      code = code >> 1;
-    if (changeCount > 6) {    // ignore < 4bit values as there are no devices sending 4bit values => noise
-      RCSwitch::nReceivedValue = code;
-      RCSwitch::nReceivedBitlength = changeCount / 2;
-      RCSwitch::nReceivedDelay = delay;
-      RCSwitch::nReceivedProtocol = 1;
-    }
-
-    if (code == 0){
-        return false;
-    }else if (code != 0){
-        return true;
-    }
-}
-*/
-
-
-
-bool checkPreamble(int changeCount)
+/** Expected preamble is 3 pules of =900 (Z)
+ * Send command: echo -e "SZZZABCD+" | tdtool --raw - 2>&1
+ *
+ */
+bool checkPreamble()
 {
   int l = 800;
-  int h = 1100;
-  int retVal = false;
+  int h = 1000;
 
   if (timings[1] > l && timings[1] < h )
   {
@@ -136,72 +71,85 @@ bool checkPreamble(int changeCount)
     {
       if (timings[3] > l && timings[3] < h )
       {
-
-        Serial.println("pre OK");
-
-        /*for (int i=0;i<changeCount;i++)
-        {
-          if (timings[i] > 3000 )
-          {
-            //return false;
-          }
-        }
-        */
-        retVal = true;
+        return true;
       }
     }
   }
 
-  //if (retVal && changeCount > 6)
-  if (retVal)
+  return false;
+}
+
+/** Check if code has been sent
+ *
+ */
+bool receivedCode(unsigned int changedCount)
+{
+  if ( checkPreamble() )
   {
-    // ignore < 4bit values as there are no devices sending 4bit values => noise
-    //RCSwitch::nReceivedValue = code;
-    //RCSwitch::nReceivedBitlength = changeCount / 2;
-    //RCSwitch::nReceivedDelay = delay;
-    //RCSwitch::nReceivedProtocol = 1;
-    receivedData = true;
-    memcpy( timingsP, timings, MAX_CHANGES );
-    changeCountP = changeCount;
+
+    for (int i = 4; i<changedCount; i++)
+    {
+      if (timings[i] > 100)
+      {
+        // Got a 1 bit
+        nReceivedValue = nReceivedValue << 1;
+        if (timings[i] > 800)
+        {
+          nReceivedValue++;
+        }
+      }
+
+    }
+
+    // 12 is 8 bit
+    if (changedCount >= 12)
+    {
+      //detachInterrupt(0);
+      nReceivedBitlength = changedCount;
+      nReceivedProtocol = 1;
+    }
+    return true;
 
   }
 
-  return retVal;  
 }
 
-void blink()
+void handleInterrupt()
 {
   static unsigned int duration;
+  static unsigned int changeCount;
   static unsigned long lastTime;
   static unsigned int repeatCount;
   long time = micros();
-
   duration = time - lastTime;
 
-
-  //if (duration > 5000 && duration > timings[0] - 2000 && duration < timings[0] + 2000)
-  //if (duration > 7000 && duration > timings[0] - 2000 && duration < timings[0] + 2000)
-  if (duration > 7000)
+  //if (duration > 5000 && duration > RCSwitch::timings[0] - 200 && duration < RCSwitch::timings[0] + 200) {
+  // - tellstick sends 0 for > 5000 before each packet
+  if (duration > 5000)
   {
-    state = !state;
+    //repeatCount++;
+    //changeCount--;
 
-    repeatCount++;
-    changeCount--;
-    if (repeatCount == 2) {
-      if (checkPreamble(changeCount) == false){
-        //failed
+    if ( changeCount >= 3 )
+    {
+      if ( receivedCode(changeCount) == false )
+      {
+        // failed
       }
-      repeatCount = 0;
     }
+
     changeCount = 0;
   }
-  else if (duration > 7000)
+  
+  // highDuration is debug
+  if ( duration > highDuration )
   {
-    changeCount = 0;
+    highDuration = duration;
   }
 
-
-  if (changeCount >= RCSWITCH_MAX_CHANGES)
+ 
+  // 12 is 8 bit
+  if (changeCount >= 12)
   {
     changeCount = 0;
     repeatCount = 0;
@@ -209,7 +157,6 @@ void blink()
 
   timings[changeCount++] = duration;
   lastTime = time;
-
 }
 
 
