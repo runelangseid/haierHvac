@@ -5,27 +5,13 @@
  * Notes
  * - tdtool sends a raw command 10 times
  *
- *
  * First three Z's are ignored (used as preamble)
  * Next, use Z as logic 1, \20x as logic 0
  * Z is 900, \20x is > 100
  *
  * Received value is 128 - echo -e "SZZZZ\x20\x20\x20\x20\x20\x20\x20+" | tdtool --raw - 2>&1
  *
- * Codes
- * 20 - 17C - 0001 0100
- * echo -e "SZZZ\x20\x20\x20Z\x20Z\x20\x20+" | tdtool --raw - 2>&1
- *
- * 25 - 22C - 0001 1001
- * echo -e "SZZZ\x20\x20\x20ZZ\x20\x20Z+" | tdtool --raw - 2>&1
- *
- * 30 - Soft On - 0001 1110
- * echo -e "SZZZ\x20\x20\x20ZZZZ\x20+" | tdtool --raw - 2>&1
- *
- * 35 - Soft Off - 0010 0011
- * echo -e "SZZZ\x20\x20Z\x20\x20\x20ZZ+" | tdtool --raw - 2>&1
- *
- * Bugs
+ * Bugs & todo
  * - first transmission after successfull retrieval submit value again
  * - preamble does not work correctly / other things gets through
  * - better handling of repeated codes within 1(?) seconds
@@ -48,7 +34,6 @@ volatile int nReceivedProtocol = 0;
 // IR
 int IRledPin =  13;    // LED connected to digital pin 13
 
-
 void setup()
 {
   Serial.begin(9600);
@@ -69,22 +54,72 @@ void loop()
     Serial.print("nReceivedValue:");
     Serial.println(nReceivedValue);
 
-    if ( nReceivedValue == 20 )
+    if ( nReceivedValue == 10 )
+    {
+      Serial.println("Sending 10");
+      Send10();
+    }
+    else if ( nReceivedValue == 17 )
     {
       Serial.println("Sending 17");
       Send17();
     }
-    else if ( nReceivedValue == 25 )
+    /*else if ( nReceivedValue == 18 )
+    {
+      Serial.println("Sending 18");
+      Send18();
+    }*/
+    else if ( nReceivedValue == 19 )
+    {
+      Serial.println("Sending 19");
+      Send19();
+    }
+    else if ( nReceivedValue == 20 )
+    {
+      Serial.println("Sending 20");
+      Send20();
+    }
+    else if ( nReceivedValue == 21 )
+    {
+      Serial.println("Sending 21");
+      Send21();
+    }
+    /*else if ( nReceivedValue == 22 )
     {
       Serial.println("Sending 22");
       Send22();
+    }*/
+    else if ( nReceivedValue == 23 )
+    {
+      Serial.println("Sending 23");
+      Send23();
+    }
+    /*else if ( nReceivedValue == 24 )
+    {
+      Serial.println("Sending 24");
+      Send24();
+    }*/
+    else if ( nReceivedValue == 25 )
+    {
+      Serial.println("Sending 25");
+      Send25();
     }
     else if ( nReceivedValue == 30 )
     {
-      Serial.println("Sending Soft on");
-      SendSoftOn();
+      Serial.println("Sending on");
+      SendOn();
+    }
+    else if ( nReceivedValue == 31 )
+    {
+      Serial.println("Sending Heat");
+      SendHeat();
     }
     else if ( nReceivedValue == 35 )
+    {
+      Serial.println("Sending Soft On");
+      SendSoftOn();
+    }
+    else if ( nReceivedValue == 36 )
     {
       Serial.println("Sending Soft off");
       SendSoftOff();
@@ -155,6 +190,7 @@ bool receivedCode(unsigned int changedCount)
 
 }
 
+/* Interrupt handling routine */
 void handleInterrupt()
 {
   static unsigned int duration;
@@ -223,33 +259,155 @@ void pulseIR(long microsecs) {
   sei();  // this turns them back on
 }
 
-void SendLight() {
-  pulseIR(3000);delayMicroseconds(3000);pulseIR(3040);delayMicroseconds(4320); pulseIR(580);delayMicroseconds(1600);pulseIR(580);delayMicroseconds(540);pulseIR(560);delayMicroseconds(1620);pulseIR(540);delayMicroseconds(540);pulseIR(580);delayMicroseconds(520); pulseIR(580); delayMicroseconds(1600); pulseIR(580); delayMicroseconds(1580); pulseIR(560); delayMicroseconds(540); pulseIR(580); delayMicroseconds(500); pulseIR(580); delayMicroseconds(1600); pulseIR(580); delayMicroseconds(540); pulseIR(540); delayMicroseconds(540); pulseIR(560); delayMicroseconds(1620); pulseIR(560); delayMicroseconds(520); pulseIR(600); delayMicroseconds(1580); pulseIR(580); delayMicroseconds(520); pulseIR(580); delayMicroseconds(500); pulseIR(580); delayMicroseconds(540); pulseIR(540); delayMicroseconds(1620); pulseIR(580); delayMicroseconds(1600); pulseIR(580); delayMicroseconds(520); pulseIR(560); delayMicroseconds(1620); pulseIR(560); delayMicroseconds(1600); pulseIR(580); delayMicroseconds(1600); pulseIR(540); delayMicroseconds(540); pulseIR(580); delayMicroseconds(520); pulseIR(580); delayMicroseconds(520); pulseIR(540); delayMicroseconds(540); pulseIR(580); delayMicroseconds(520); pulseIR(580); delayMicroseconds(520); pulseIR(560); delayMicroseconds(520); pulseIR(580); delayMicroseconds(520); pulseIR(560); delayMicroseconds(540); pulseIR(580); delayMicroseconds(1600); pulseIR(580); delayMicroseconds(500); pulseIR(580); delayMicroseconds(1600); pulseIR(580); delayMicroseconds(1600); pulseIR(580); delayMicroseconds(500); pulseIR(580); delayMicroseconds(520); pulseIR(580); delayMicroseconds(520); pulseIR(560); delayMicroseconds(540); pulseIR(580); delayMicroseconds(1600); pulseIR(560); delayMicroseconds(1620); pulseIR(560); delayMicroseconds(520); pulseIR(580); delayMicroseconds(500); pulseIR(580); delayMicroseconds(540); pulseIR(480); delayMicroseconds(600); pulseIR(540); delayMicroseconds(560); pulseIR(580); delayMicroseconds(500); pulseIR(580); delayMicroseconds(540); pulseIR(540); delayMicroseconds(540); pulseIR(560); delayMicroseconds(540); pulseIR(560); delayMicroseconds(520); pulseIR(580); delayMicroseconds(540); pulseIR(520); delayMicroseconds(560); pulseIR(540); delayMicroseconds(540); pulseIR(580); delayMicroseconds(1600); pulseIR(580); delayMicroseconds(520); pulseIR(580); delayMicroseconds(500); pulseIR(580); delayMicroseconds(540); pulseIR(540); delayMicroseconds(540); pulseIR(580); delayMicroseconds(500); pulseIR(580); delayMicroseconds(520); pulseIR(580); delayMicroseconds(520); pulseIR(540); delayMicroseconds(540); pulseIR(580); delayMicroseconds(520); pulseIR(580); delayMicroseconds(520); pulseIR(560); delayMicroseconds(540); pulseIR(480); delayMicroseconds(600); pulseIR(580); delayMicroseconds(520); pulseIR(560); delayMicroseconds(520); pulseIR(580); delayMicroseconds(540); pulseIR(540); delayMicroseconds(540); pulseIR(580); delayMicroseconds(500); pulseIR(580); delayMicroseconds(520); pulseIR(580); delayMicroseconds(520); pulseIR(540); delayMicroseconds(560); pulseIR(580); delayMicroseconds(500); pulseIR(580); delayMicroseconds(500); pulseIR(600); delayMicroseconds(520); pulseIR(560); delayMicroseconds(520); pulseIR(560); delayMicroseconds(540); pulseIR(580); delayMicroseconds(500); pulseIR(580); delayMicroseconds(540); pulseIR(520); delayMicroseconds(560); pulseIR(580); delayMicroseconds(500); pulseIR(580); delayMicroseconds(520); pulseIR(580); delayMicroseconds(520); pulseIR(560); delayMicroseconds(540); pulseIR(540); delayMicroseconds(540); pulseIR(580); delayMicroseconds(520); pulseIR(560); delayMicroseconds(540); pulseIR(560); delayMicroseconds(540); pulseIR(540); delayMicroseconds(540); pulseIR(580); delayMicroseconds(500); pulseIR(580); delayMicroseconds(520); pulseIR(580); delayMicroseconds(520); pulseIR(560); delayMicroseconds(520); pulseIR(600); delayMicroseconds(500); pulseIR(580); delayMicroseconds(520); pulseIR(560); delayMicroseconds(540); pulseIR(560); delayMicroseconds(520); pulseIR(580); delayMicroseconds(520); pulseIR(580); delayMicroseconds(500); pulseIR(580); delayMicroseconds(540); pulseIR(540); delayMicroseconds(1640); pulseIR(540); delayMicroseconds(540); pulseIR(580); delayMicroseconds(1600); pulseIR(560); delayMicroseconds(1620); pulseIR(560); delayMicroseconds(1620); pulseIR(540); delayMicroseconds(1620); pulseIR(580); delayMicroseconds(1600); pulseIR(540);
+
+/*
+ * IR code section
+ *
+ */
+// Send 10
+void Send10() {
+  int codes[400] = {
+    3020,3020,3000,4360,560,1600,580,520,600,1580,600,500,580,520,580,1600,580,1580,600,500,580,500,580,520,540,560,520,1660,580,1580,600,520,500,1660,520,580,580,500,560,540,540,560,520,580,580,500,580,520,520,1660,540,540,540,560,520,580,560,520,580,520,540,540,540,580,560,520,560,540,520,560,520,1660,520,1660,540,560,520,580,560,1620,560,520,560,520,540,560,520,1660,540,1640,540,560,520,580,560,520,580,500,580,520,540,560,580,520,580,500,540,560,520,580,560,540,560,520,580,500,540,1640,540,580,520,560,560,540,520,560,540,580,500,580,500,580,580,520,520,560,540,580,560,520,580,520,520,580,500,600,500,580,580,500,540,560,520,580,560,520,580,520,540,560,520,560,520,580,580,520,520,560,540,580,540,540,580,500,540,560,520,560,540,560,560,1620,560,540,520,560,540,580,500,580,560,540,520,560,600,480,580,540,560,520,580,520,560,1620,520,1660,520,1660,520,1640,600,500,540,1640,500,580,540,1640,540,560,520,580,560,1620,580,520,500,580,560,
+    99999
+  };
+  sendIR( codes, 400);
 }
 
-void SendOff() {
-  pulseIR(3040); delayMicroseconds(2980); pulseIR(2940); delayMicroseconds(4420); pulseIR(520); delayMicroseconds(1660); pulseIR(580); delayMicroseconds(520); pulseIR(600); delayMicroseconds(1560); pulseIR(540); delayMicroseconds(560); pulseIR(600); delayMicroseconds(500); pulseIR(520); delayMicroseconds(1660); pulseIR(580); delayMicroseconds(1580); pulseIR(540); delayMicroseconds(580); pulseIR(500); delayMicroseconds(580); pulseIR(560); delayMicroseconds(1620); pulseIR(540); delayMicroseconds(1640); pulseIR(480); delayMicroseconds(600); pulseIR(580); delayMicroseconds(1600); pulseIR(520); delayMicroseconds(580); pulseIR(600); delayMicroseconds(1560); pulseIR(500); delayMicroseconds(600); pulseIR(600); delayMicroseconds(520); pulseIR(580); delayMicroseconds(500); pulseIR(480); delayMicroseconds(1700); pulseIR(480); delayMicroseconds(1700); pulseIR(500); delayMicroseconds(580); pulseIR(500); delayMicroseconds(1680); pulseIR(500); delayMicroseconds(1660); pulseIR(600); delayMicroseconds(1580); pulseIR(600); delayMicroseconds(500); pulseIR(600); delayMicroseconds(500); pulseIR(580); delayMicroseconds(500); pulseIR(480); delayMicroseconds(620); pulseIR(600); delayMicroseconds(500); pulseIR(580); delayMicroseconds(520); pulseIR(580); delayMicroseconds(500); pulseIR(580); delayMicroseconds(520); pulseIR(560); delayMicroseconds(520); pulseIR(600); delayMicroseconds(500); pulseIR(580); delayMicroseconds(1580); pulseIR(540); delayMicroseconds(1640); pulseIR(600); delayMicroseconds(520); pulseIR(500); delayMicroseconds(1680); pulseIR(500); delayMicroseconds(1660); pulseIR(600); delayMicroseconds(500); pulseIR(520); delayMicroseconds(560); pulseIR(500); delayMicroseconds(1680); pulseIR(500); delayMicroseconds(1680); pulseIR(500); delayMicroseconds(600); pulseIR(560); delayMicroseconds(520); pulseIR(600); delayMicroseconds(500); pulseIR(600); delayMicroseconds(520); pulseIR(560); delayMicroseconds(520); pulseIR(500); delayMicroseconds(580); pulseIR(600); delayMicroseconds(500); pulseIR(580); delayMicroseconds(520); pulseIR(480); delayMicroseconds(600); pulseIR(580); delayMicroseconds(520); pulseIR(580); delayMicroseconds(500); pulseIR(600); delayMicroseconds(520); pulseIR(500); delayMicroseconds(580); pulseIR(480); delayMicroseconds(1700); pulseIR(480); delayMicroseconds(600); pulseIR(600); delayMicroseconds(500); pulseIR(600); delayMicroseconds(500); pulseIR(580); delayMicroseconds(520); pulseIR(480); delayMicroseconds(600); pulseIR(600); delayMicroseconds(480); pulseIR(600); delayMicroseconds(500); pulseIR(520); delayMicroseconds(580); pulseIR(500); delayMicroseconds(600); pulseIR(560); delayMicroseconds(520); pulseIR(600); delayMicroseconds(520); pulseIR(500); delayMicroseconds(580); pulseIR(480); delayMicroseconds(600); pulseIR(620); delayMicroseconds(480); pulseIR(580); delayMicroseconds(500); pulseIR(600); delayMicroseconds(520); pulseIR(480); delayMicroseconds(600); pulseIR(520); delayMicroseconds(580); pulseIR(520); delayMicroseconds(600); pulseIR(500); delayMicroseconds(580); pulseIR(480); delayMicroseconds(600); pulseIR(500); delayMicroseconds(580); pulseIR(580); delayMicroseconds(520); pulseIR(600); delayMicroseconds(500); pulseIR(520); delayMicroseconds(580); pulseIR(500); delayMicroseconds(580); pulseIR(600); delayMicroseconds(500); pulseIR(520); delayMicroseconds(580); pulseIR(480); delayMicroseconds(600); pulseIR(520); delayMicroseconds(580); pulseIR(500); delayMicroseconds(1680); pulseIR(560); delayMicroseconds(520); pulseIR(480); delayMicroseconds(600); pulseIR(540); delayMicroseconds(560); pulseIR(600); delayMicroseconds(500); pulseIR(600); delayMicroseconds(500); pulseIR(480); delayMicroseconds(600); pulseIR(540); delayMicroseconds(560); pulseIR(520); delayMicroseconds(580); pulseIR(520); delayMicroseconds(580); pulseIR(480); delayMicroseconds(600); pulseIR(600); delayMicroseconds(500); pulseIR(520); delayMicroseconds(580); pulseIR(500); delayMicroseconds(580); pulseIR(480); delayMicroseconds(1700); pulseIR(480); delayMicroseconds(600); pulseIR(500); delayMicroseconds(1660); pulseIR(540); delayMicroseconds(580); pulseIR(580); delayMicroseconds(1600); pulseIR(560); delayMicroseconds(1600); pulseIR(600); delayMicroseconds(500); pulseIR(480); delayMicroseconds(600); pulseIR(580); delayMicroseconds(520); pulseIR(540); delayMicroseconds(1640); pulseIR(480); delayMicroseconds(1680); pulseIR(520);
-}
-
-void SendOn() {
-  pulseIR(2940); delayMicroseconds(3080); pulseIR(2980); delayMicroseconds(4380); pulseIR(540); delayMicroseconds(1640); pulseIR(540); delayMicroseconds(600); pulseIR(460); delayMicroseconds(1680); pulseIR(520); delayMicroseconds(600); pulseIR(480); delayMicroseconds(580); pulseIR(540); delayMicroseconds(1640); pulseIR(540); delayMicroseconds(1640); pulseIR(480); delayMicroseconds(600); pulseIR(540); delayMicroseconds(580); pulseIR(520); delayMicroseconds(1640); pulseIR(540); delayMicroseconds(1620); pulseIR(560); delayMicroseconds(560); pulseIR(520); delayMicroseconds(1640); pulseIR(540); delayMicroseconds(580); pulseIR(480); delayMicroseconds(1660); pulseIR(540); delayMicroseconds(620); pulseIR(440); delayMicroseconds(600); pulseIR(520); delayMicroseconds(580); pulseIR(540); delayMicroseconds(1620); pulseIR(560); delayMicroseconds(1620); pulseIR(560); delayMicroseconds(540); pulseIR(540); delayMicroseconds(1640); pulseIR(540); delayMicroseconds(1640); pulseIR(500); delayMicroseconds(1680); pulseIR(520); delayMicroseconds(600); pulseIR(460); delayMicroseconds(600); pulseIR(540); delayMicroseconds(540); pulseIR(540); delayMicroseconds(580); pulseIR(500); delayMicroseconds(580); pulseIR(480); delayMicroseconds(620); pulseIR(540); delayMicroseconds(560); pulseIR(520); delayMicroseconds(560); pulseIR(520); delayMicroseconds(580); pulseIR(480); delayMicroseconds(1700); pulseIR(480); delayMicroseconds(1680); pulseIR(520); delayMicroseconds(1660); pulseIR(520); delayMicroseconds(580); pulseIR(480); delayMicroseconds(1700); pulseIR(480); delayMicroseconds(1680); pulseIR(540); delayMicroseconds(1640); pulseIR(500); delayMicroseconds(580); pulseIR(540); delayMicroseconds(1640); pulseIR(540); delayMicroseconds(1640); pulseIR(540); delayMicroseconds(580); pulseIR(520); delayMicroseconds(560); pulseIR(520); delayMicroseconds(560); pulseIR(500); delayMicroseconds(600); pulseIR(480); delayMicroseconds(620); pulseIR(520); delayMicroseconds(560); pulseIR(520); delayMicroseconds(580); pulseIR(480); delayMicroseconds(640); pulseIR(500); delayMicroseconds(560); pulseIR(540); delayMicroseconds(600); pulseIR(480); delayMicroseconds(580); pulseIR(480); delayMicroseconds(600); pulseIR(500); delayMicroseconds(600); pulseIR(520); delayMicroseconds(1640); pulseIR(540); delayMicroseconds(600); pulseIR(500); delayMicroseconds(580); pulseIR(500); delayMicroseconds(580); pulseIR(500); delayMicroseconds(580); pulseIR(540); delayMicroseconds(580); pulseIR(520); delayMicroseconds(580); pulseIR(500); delayMicroseconds(600); pulseIR(460); delayMicroseconds(600); pulseIR(540); delayMicroseconds(580); pulseIR(500); delayMicroseconds(580); pulseIR(520); delayMicroseconds(560); pulseIR(520); delayMicroseconds(580); pulseIR(540); delayMicroseconds(560); pulseIR(520); delayMicroseconds(580); pulseIR(500); delayMicroseconds(580); pulseIR(480); delayMicroseconds(600); pulseIR(540); delayMicroseconds(560); pulseIR(540); delayMicroseconds(560); pulseIR(520); delayMicroseconds(580); pulseIR(480); delayMicroseconds(640); pulseIR(500); delayMicroseconds(560); pulseIR(520); delayMicroseconds(600); pulseIR(500); delayMicroseconds(600); pulseIR(460); delayMicroseconds(600); pulseIR(540); delayMicroseconds(560); pulseIR(520); delayMicroseconds(580); pulseIR(520); delayMicroseconds(600); pulseIR(460); delayMicroseconds(600); pulseIR(540); delayMicroseconds(540); pulseIR(540); delayMicroseconds(560); pulseIR(520); delayMicroseconds(1640); pulseIR(520); delayMicroseconds(600); pulseIR(520); delayMicroseconds(580); pulseIR(500); delayMicroseconds(580); pulseIR(480); delayMicroseconds(600); pulseIR(520); delayMicroseconds(560); pulseIR(540); delayMicroseconds(580); pulseIR(520); delayMicroseconds(580); pulseIR(500); delayMicroseconds(580); pulseIR(500); delayMicroseconds(580); pulseIR(540); delayMicroseconds(560); pulseIR(520); delayMicroseconds(620); pulseIR(440); delayMicroseconds(620); pulseIR(500); delayMicroseconds(580); pulseIR(540); delayMicroseconds(1620); pulseIR(560); delayMicroseconds(580); pulseIR(500); delayMicroseconds(1640); pulseIR(500); delayMicroseconds(1680); pulseIR(520); delayMicroseconds(560); pulseIR(520); delayMicroseconds(1660); pulseIR(500); delayMicroseconds(600); pulseIR(540); delayMicroseconds(560); pulseIR(520); delayMicroseconds(1640); pulseIR(540); delayMicroseconds(580); pulseIR(520); delayMicroseconds(540); pulseIR(540);
-
-}
-
-void SendSoftOn() {
- pulseIR(2980); delayMicroseconds(3060); pulseIR(2920); delayMicroseconds(4420); pulseIR(520); delayMicroseconds(1660); pulseIR(520); delayMicroseconds(580); pulseIR(540); delayMicroseconds(1640); pulseIR(540); delayMicroseconds(580); pulseIR(500); delayMicroseconds(580); pulseIR(500); delayMicroseconds(1680); pulseIR(500); delayMicroseconds(1640); pulseIR(560); delayMicroseconds(600); pulseIR(480); delayMicroseconds(580); pulseIR(500); delayMicroseconds(1660); pulseIR(500); delayMicroseconds(1680); pulseIR(500); delayMicroseconds(600); pulseIR(500); delayMicroseconds(1680); pulseIR(500); delayMicroseconds(600); pulseIR(520); delayMicroseconds(1640); pulseIR(500); delayMicroseconds(600); pulseIR(540); delayMicroseconds(560); pulseIR(520); delayMicroseconds(580); pulseIR(480); delayMicroseconds(1680); pulseIR(520); delayMicroseconds(580); pulseIR(500); delayMicroseconds(580); pulseIR(540); delayMicroseconds(580); pulseIR(520); delayMicroseconds(560); pulseIR(520); delayMicroseconds(580); pulseIR(480); delayMicroseconds(600); pulseIR(540); delayMicroseconds(560); pulseIR(520); delayMicroseconds(580); pulseIR(520); delayMicroseconds(560); pulseIR(520); delayMicroseconds(580); pulseIR(540); delayMicroseconds(580); pulseIR(500); delayMicroseconds(560); pulseIR(520); delayMicroseconds(580); pulseIR(480); delayMicroseconds(620); pulseIR(520); delayMicroseconds(1640); pulseIR(520); delayMicroseconds(580); pulseIR(540); delayMicroseconds(560); pulseIR(520); delayMicroseconds(1640); pulseIR(540); delayMicroseconds(580); pulseIR(480); delayMicroseconds(600); pulseIR(520); delayMicroseconds(1640); pulseIR(540); delayMicroseconds(580); pulseIR(500); delayMicroseconds(1660); pulseIR(520); delayMicroseconds(1640); pulseIR(540); delayMicroseconds(580); pulseIR(500); delayMicroseconds(580); pulseIR(520); delayMicroseconds(580); pulseIR(540); delayMicroseconds(540); pulseIR(540); delayMicroseconds(580); pulseIR(500); delayMicroseconds(1660); pulseIR(520); delayMicroseconds(620); pulseIR(440); delayMicroseconds(600); pulseIR(540); delayMicroseconds(560); pulseIR(540); delayMicroseconds(560); pulseIR(520); delayMicroseconds(560); pulseIR(500); delayMicroseconds(600); pulseIR(480); delayMicroseconds(600); pulseIR(540); delayMicroseconds(1640); pulseIR(540); delayMicroseconds(580); pulseIR(500); delayMicroseconds(620); pulseIR(480); delayMicroseconds(580); pulseIR(500); delayMicroseconds(580); pulseIR(540); delayMicroseconds(580); pulseIR(500); delayMicroseconds(560); pulseIR(540); delayMicroseconds(560); pulseIR(500); delayMicroseconds(600); pulseIR(540); delayMicroseconds(540); pulseIR(540); delayMicroseconds(580); pulseIR(500); delayMicroseconds(580); pulseIR(500); delayMicroseconds(600); pulseIR(520); delayMicroseconds(580); pulseIR(520); delayMicroseconds(580); pulseIR(500); delayMicroseconds(580); pulseIR(480); delayMicroseconds(600); pulseIR(540); delayMicroseconds(560); pulseIR(540); delayMicroseconds(600); pulseIR(480); delayMicroseconds(580); pulseIR(480); delayMicroseconds(600); pulseIR(540); delayMicroseconds(560); pulseIR(520); delayMicroseconds(560); pulseIR(520); delayMicroseconds(580); pulseIR(480); delayMicroseconds(620); pulseIR(500); delayMicroseconds(580); pulseIR(540); delayMicroseconds(560); pulseIR(520); delayMicroseconds(580); pulseIR(480); delayMicroseconds(600); pulseIR(540); delayMicroseconds(580); pulseIR(520); delayMicroseconds(580); pulseIR(500); delayMicroseconds(1640); pulseIR(500); delayMicroseconds(600); pulseIR(520); delayMicroseconds(580); pulseIR(520); delayMicroseconds(560); pulseIR(500); delayMicroseconds(600); pulseIR(500); delayMicroseconds(580); pulseIR(540); delayMicroseconds(580); pulseIR(500); delayMicroseconds(580); pulseIR(520); delayMicroseconds(600); pulseIR(480); delayMicroseconds(580); pulseIR(540); delayMicroseconds(580); pulseIR(500); delayMicroseconds(600); pulseIR(480); delayMicroseconds(580); pulseIR(520); delayMicroseconds(1660); pulseIR(480); delayMicroseconds(640); pulseIR(500); delayMicroseconds(560); pulseIR(540); delayMicroseconds(580); pulseIR(500); delayMicroseconds(1640); pulseIR(540); delayMicroseconds(1640); pulseIR(540); delayMicroseconds(1640); pulseIR(540); delayMicroseconds(620); pulseIR(460); delayMicroseconds(620); pulseIR(440); delayMicroseconds(620); pulseIR(520); delayMicroseconds(1640); pulseIR(500); delayMicroseconds(600); pulseIR(500);
-
-}
-
-void SendSoftOff() {
-  pulseIR(3040); delayMicroseconds(2980); pulseIR(2920); delayMicroseconds(4440); pulseIR(500); delayMicroseconds(1680); pulseIR(500); delayMicroseconds(580); pulseIR(540); delayMicroseconds(1640); pulseIR(540); delayMicroseconds(580); pulseIR(500); delayMicroseconds(580); pulseIR(520); delayMicroseconds(1660); pulseIR(520); delayMicroseconds(1640); pulseIR(540); delayMicroseconds(580); pulseIR(500); delayMicroseconds(580); pulseIR(540); delayMicroseconds(540); pulseIR(540); delayMicroseconds(560); pulseIR(580); delayMicroseconds(1600); pulseIR(520); delayMicroseconds(1660); pulseIR(520); delayMicroseconds(580); pulseIR(520); delayMicroseconds(1640); pulseIR(540); delayMicroseconds(560); pulseIR(520); delayMicroseconds(580); pulseIR(480); delayMicroseconds(600); pulseIR(600); delayMicroseconds(1580); pulseIR(520); delayMicroseconds(580); pulseIR(520); delayMicroseconds(580); pulseIR(520); delayMicroseconds(580); pulseIR(480); delayMicroseconds(600); pulseIR(480); delayMicroseconds(600); pulseIR(540); delayMicroseconds(560); pulseIR(600); delayMicroseconds(500); pulseIR(480); delayMicroseconds(620); pulseIR(560); delayMicroseconds(520); pulseIR(540); delayMicroseconds(560); pulseIR(520); delayMicroseconds(580); pulseIR(480); delayMicroseconds(600); pulseIR(500); delayMicroseconds(600); pulseIR(540); delayMicroseconds(540); pulseIR(540); delayMicroseconds(1640); pulseIR(540); delayMicroseconds(580); pulseIR(500); delayMicroseconds(1680); pulseIR(500); delayMicroseconds(1660); pulseIR(520); delayMicroseconds(580); pulseIR(480); delayMicroseconds(1680); pulseIR(540); delayMicroseconds(560); pulseIR(500); delayMicroseconds(600); pulseIR(580); delayMicroseconds(1600); pulseIR(500); delayMicroseconds(1680); pulseIR(480); delayMicroseconds(600); pulseIR(540); delayMicroseconds(560); pulseIR(520); delayMicroseconds(580); pulseIR(500); delayMicroseconds(580); pulseIR(520); delayMicroseconds(580); pulseIR(520); delayMicroseconds(560); pulseIR(540); delayMicroseconds(580); pulseIR(500); delayMicroseconds(580); pulseIR(480); delayMicroseconds(620); pulseIR(580); delayMicroseconds(500); pulseIR(540); delayMicroseconds(560); pulseIR(520); delayMicroseconds(580); pulseIR(560); delayMicroseconds(520); pulseIR(580); delayMicroseconds(1600); pulseIR(500); delayMicroseconds(600); pulseIR(520); delayMicroseconds(560); pulseIR(540); delayMicroseconds(560); pulseIR(500); delayMicroseconds(600); pulseIR(500); delayMicroseconds(580); pulseIR(600); delayMicroseconds(500); pulseIR(580); delayMicroseconds(520); pulseIR(520); delayMicroseconds(580); pulseIR(480); delayMicroseconds(600); pulseIR(540); delayMicroseconds(560); pulseIR(580); delayMicroseconds(520); pulseIR(480); delayMicroseconds(600); pulseIR(580); delayMicroseconds(520); pulseIR(600); delayMicroseconds(480); pulseIR(600); delayMicroseconds(520); pulseIR(560); delayMicroseconds(520); pulseIR(480); delayMicroseconds(600); pulseIR(600); delayMicroseconds(500); pulseIR(600); delayMicroseconds(500); pulseIR(520); delayMicroseconds(580); pulseIR(500); delayMicroseconds(580); pulseIR(540); delayMicroseconds(540); pulseIR(540); delayMicroseconds(580); pulseIR(520); delayMicroseconds(560); pulseIR(500); delayMicroseconds(600); pulseIR(600); delayMicroseconds(480); pulseIR(600); delayMicroseconds(520); pulseIR(500); delayMicroseconds(580); pulseIR(480); delayMicroseconds(620); pulseIR(580); delayMicroseconds(500); pulseIR(600); delayMicroseconds(520); pulseIR(560); delayMicroseconds(520); pulseIR(480); delayMicroseconds(600); pulseIR(600); delayMicroseconds(500); pulseIR(520); delayMicroseconds(580); pulseIR(580); delayMicroseconds(520); pulseIR(480); delayMicroseconds(600); pulseIR(540); delayMicroseconds(540); pulseIR(600); delayMicroseconds(500); pulseIR(520); delayMicroseconds(580); pulseIR(480); delayMicroseconds(620); pulseIR(560); delayMicroseconds(520); pulseIR(600); delayMicroseconds(520); pulseIR(560); delayMicroseconds(1580); pulseIR(600); delayMicroseconds(520); pulseIR(480); delayMicroseconds(600); pulseIR(520); delayMicroseconds(580); pulseIR(600); delayMicroseconds(480); pulseIR(540); delayMicroseconds(580); pulseIR(500); delayMicroseconds(1680); pulseIR(500); delayMicroseconds(580); pulseIR(480); delayMicroseconds(600); pulseIR(540); delayMicroseconds(560); pulseIR(540); delayMicroseconds(1640); pulseIR(500); delayMicroseconds(580); pulseIR(540);
-
-}
-
+// Send 17
 void Send17() {
-  pulseIR(3000); delayMicroseconds(3000); pulseIR(3060); delayMicroseconds(4300); pulseIR(540); delayMicroseconds(1640); pulseIR(540); delayMicroseconds(580); pulseIR(480); delayMicroseconds(1680); pulseIR(520); delayMicroseconds(580); pulseIR(500); delayMicroseconds(580); pulseIR(620); delayMicroseconds(1560); pulseIR(540); delayMicroseconds(1640); pulseIR(560); delayMicroseconds(540); pulseIR(520); delayMicroseconds(560); pulseIR(600); delayMicroseconds(520); pulseIR(500); delayMicroseconds(580); pulseIR(580); delayMicroseconds(1600); pulseIR(480); delayMicroseconds(1700); pulseIR(480); delayMicroseconds(600); pulseIR(600); delayMicroseconds(1580); pulseIR(520); delayMicroseconds(580); pulseIR(600); delayMicroseconds(480); pulseIR(600); delayMicroseconds(520); pulseIR(580); delayMicroseconds(1540); pulseIR(560); delayMicroseconds(580); pulseIR(480); delayMicroseconds(600); pulseIR(600); delayMicroseconds(500); pulseIR(600); delayMicroseconds(480); pulseIR(600); delayMicroseconds(520); pulseIR(480); delayMicroseconds(600); pulseIR(580); delayMicroseconds(520); pulseIR(600); delayMicroseconds(520); pulseIR(560); delayMicroseconds(520); pulseIR(480); delayMicroseconds(600); pulseIR(580); delayMicroseconds(500); pulseIR(600); delayMicroseconds(500); pulseIR(540); delayMicroseconds(560); pulseIR(520); delayMicroseconds(580); pulseIR(560); delayMicroseconds(1600); pulseIR(500); delayMicroseconds(600); pulseIR(600); delayMicroseconds(500); pulseIR(520); delayMicroseconds(1660); pulseIR(520); delayMicroseconds(580); pulseIR(500); delayMicroseconds(1660); pulseIR(540); delayMicroseconds(560); pulseIR(520); delayMicroseconds(580); pulseIR(480); delayMicroseconds(1700); pulseIR(480); delayMicroseconds(1700); pulseIR(480); delayMicroseconds(600); pulseIR(560); delayMicroseconds(540); pulseIR(580); delayMicroseconds(500); pulseIR(600); delayMicroseconds(500); pulseIR(580); delayMicroseconds(520); pulseIR(480); delayMicroseconds(1700); pulseIR(480); delayMicroseconds(600); pulseIR(600); delayMicroseconds(500); pulseIR(580); delayMicroseconds(520); pulseIR(500); delayMicroseconds(580); pulseIR(560); delayMicroseconds(540); pulseIR(600); delayMicroseconds(480); pulseIR(600); delayMicroseconds(520); pulseIR(580); delayMicroseconds(1580); pulseIR(520); delayMicroseconds(580); pulseIR(480); delayMicroseconds(600); pulseIR(520); delayMicroseconds(580); pulseIR(540); delayMicroseconds(560); pulseIR(580); delayMicroseconds(520); pulseIR(480); delayMicroseconds(600); pulseIR(480); delayMicroseconds(620); pulseIR(580); delayMicroseconds(500); pulseIR(600); delayMicroseconds(520); pulseIR(500); delayMicroseconds(580); pulseIR(560); delayMicroseconds(520); pulseIR(600); delayMicroseconds(500); pulseIR(600); delayMicroseconds(500); pulseIR(500); delayMicroseconds(600); pulseIR(500); delayMicroseconds(580); pulseIR(600); delayMicroseconds(500); pulseIR(580); delayMicroseconds(520); pulseIR(580); delayMicroseconds(500); pulseIR(560); delayMicroseconds(540); pulseIR(600); delayMicroseconds(480); pulseIR(540); delayMicroseconds(580); pulseIR(500); delayMicroseconds(580); pulseIR(520); delayMicroseconds(560); pulseIR(600); delayMicroseconds(500); pulseIR(540); delayMicroseconds(560); pulseIR(580); delayMicroseconds(520); pulseIR(480); delayMicroseconds(600); pulseIR(540); delayMicroseconds(560); pulseIR(580); delayMicroseconds(520); pulseIR(520); delayMicroseconds(580); pulseIR(560); delayMicroseconds(520); pulseIR(580); delayMicroseconds(500); pulseIR(540); delayMicroseconds(580); pulseIR(500); delayMicroseconds(580); pulseIR(480); delayMicroseconds(620); pulseIR(600); delayMicroseconds(480); pulseIR(600); delayMicroseconds(520); pulseIR(560); delayMicroseconds(520); pulseIR(580); delayMicroseconds(500); pulseIR(580); delayMicroseconds(520); pulseIR(600); delayMicroseconds(520); pulseIR(560); delayMicroseconds(500); pulseIR(500); delayMicroseconds(600); pulseIR(600); delayMicroseconds(500); pulseIR(580); delayMicroseconds(520); pulseIR(580); delayMicroseconds(480); pulseIR(540); delayMicroseconds(580); pulseIR(500); delayMicroseconds(1680); pulseIR(480); delayMicroseconds(600); pulseIR(600); delayMicroseconds(500); pulseIR(580); delayMicroseconds(520); pulseIR(520); delayMicroseconds(1660); pulseIR(520); delayMicroseconds(560); pulseIR(500); delayMicroseconds(1660); pulseIR(540); delayMicroseconds(580); pulseIR(480);
+  int codes[400] = {
+    3020,3020,3020,4320,520,1660,580,540,540,1640,540,540,580,520,580,1600,580,1580,560,540,580,520,560,540,540,540,580,1600,560,1620,560,540,580,1580,540,560,580,500,600,520,560,520,560,540,580,500,580,540,520,1640,560,540,480,600,580,520,580,500,580,540,540,540,580,520,560,520,580,540,560,520,580,1600,560,1620,540,540,580,520,580,520,560,1600,580,1600,540,540,580,1600,580,1600,580,520,580,500,580,540,460,620,520,560,580,520,580,520,560,520,580,520,580,500,580,540,560,520,560,540,580,1600,560,520,580,540,540,540,540,540,580,520,580,500,580,540,560,520,580,520,560,520,580,520,560,540,580,500,580,520,580,520,560,520,580,520,580,500,580,540,540,540,580,520,580,500,580,540,540,540,560,520,580,520,580,520,580,520,580,500,580,500,580,540,560,520,560,540,580,500,580,540,540,540,580,500,580,520,580,500,580,540,540,540,580,520,560,540,560,540,540,540,580,500,580,520,580,520,560,520,600,500,580,520,560,540,540,1640,540,540,580,1580,580,
+    99999
+  };
+  sendIR( codes, 400);
 }
 
-void Send22() {
-  pulseIR(2940); delayMicroseconds(3080); pulseIR(2980); delayMicroseconds(4380); pulseIR(540); delayMicroseconds(1640); pulseIR(540); delayMicroseconds(560); pulseIR(500); delayMicroseconds(1680); pulseIR(520); delayMicroseconds(560); pulseIR(520); delayMicroseconds(620); pulseIR(500); delayMicroseconds(1640); pulseIR(540); delayMicroseconds(1640); pulseIR(480); delayMicroseconds(600); pulseIR(540); delayMicroseconds(580); pulseIR(520); delayMicroseconds(1640); pulseIR(540); delayMicroseconds(1640); pulseIR(520); delayMicroseconds(580); pulseIR(520); delayMicroseconds(1640); pulseIR(540); delayMicroseconds(580); pulseIR(480); delayMicroseconds(1680); pulseIR(520); delayMicroseconds(620); pulseIR(440); delayMicroseconds(600); pulseIR(520); delayMicroseconds(600); pulseIR(520); delayMicroseconds(1620); pulseIR(560); delayMicroseconds(1620); pulseIR(560); delayMicroseconds(580); pulseIR(500); delayMicroseconds(1640); pulseIR(540); delayMicroseconds(1620); pulseIR(520); delayMicroseconds(1680); pulseIR(520); delayMicroseconds(600); pulseIR(460); delayMicroseconds(580); pulseIR(560); delayMicroseconds(580); pulseIR(500); delayMicroseconds(600); pulseIR(480); delayMicroseconds(620); pulseIR(440); delayMicroseconds(600); pulseIR(540); delayMicroseconds(580); pulseIR(520); delayMicroseconds(580); pulseIR(500); delayMicroseconds(600); pulseIR(460); delayMicroseconds(1680); pulseIR(500); delayMicroseconds(1680); pulseIR(520); delayMicroseconds(620); pulseIR(440); delayMicroseconds(1700); pulseIR(480); delayMicroseconds(640); pulseIR(500); delayMicroseconds(580); pulseIR(500); delayMicroseconds(580); pulseIR(520); delayMicroseconds(600); pulseIR(460); delayMicroseconds(1680); pulseIR(520); delayMicroseconds(1660); pulseIR(520); delayMicroseconds(620); pulseIR(440); delayMicroseconds(600); pulseIR(540); delayMicroseconds(580); pulseIR(520); delayMicroseconds(580); pulseIR(500); delayMicroseconds(620); pulseIR(440); delayMicroseconds(640); pulseIR(480); delayMicroseconds(560); pulseIR(540); delayMicroseconds(580); pulseIR(520); delayMicroseconds(600); pulseIR(460); delayMicroseconds(600); pulseIR(540); delayMicroseconds(540); pulseIR(540); delayMicroseconds(560); pulseIR(520); delayMicroseconds(620); pulseIR(440); delayMicroseconds(1700); pulseIR(520); delayMicroseconds(600); pulseIR(460); delayMicroseconds(640); pulseIR(500); delayMicroseconds(580); pulseIR(500); delayMicroseconds(600); pulseIR(480); delayMicroseconds(580); pulseIR(520); delayMicroseconds(560); pulseIR(520); delayMicroseconds(580); pulseIR(540); delayMicroseconds(600); pulseIR(480); delayMicroseconds(620); pulseIR(440); delayMicroseconds(640); pulseIR(500); delayMicroseconds(580); pulseIR(520); delayMicroseconds(600); pulseIR(480); delayMicroseconds(600); pulseIR(480); delayMicroseconds(580); pulseIR(480); delayMicroseconds(600); pulseIR(540); delayMicroseconds(580); pulseIR(520); delayMicroseconds(600); pulseIR(460); delayMicroseconds(600); pulseIR(540); delayMicroseconds(580); pulseIR(500); delayMicroseconds(600); pulseIR(480); delayMicroseconds(620); pulseIR(440); delayMicroseconds(640); pulseIR(460); delayMicroseconds(620); pulseIR(520); delayMicroseconds(580); pulseIR(500); delayMicroseconds(600); pulseIR(460); delayMicroseconds(600); pulseIR(540); delayMicroseconds(540); pulseIR(560); delayMicroseconds(560); pulseIR(520); delayMicroseconds(600); pulseIR(460); delayMicroseconds(600); pulseIR(480); delayMicroseconds(600); pulseIR(540); delayMicroseconds(580); pulseIR(500); delayMicroseconds(620); pulseIR(440); delayMicroseconds(640); pulseIR(480); delayMicroseconds(580); pulseIR(540); delayMicroseconds(580); pulseIR(500); delayMicroseconds(600); pulseIR(460); delayMicroseconds(600); pulseIR(500); delayMicroseconds(580); pulseIR(560); delayMicroseconds(580); pulseIR(500); delayMicroseconds(600); pulseIR(460); delayMicroseconds(600); pulseIR(500); delayMicroseconds(580); pulseIR(540); delayMicroseconds(580); pulseIR(520); delayMicroseconds(600); pulseIR(460); delayMicroseconds(580); pulseIR(500); delayMicroseconds(600); pulseIR(540); delayMicroseconds(1640); pulseIR(540); delayMicroseconds(540); pulseIR(540); delayMicroseconds(620); pulseIR(480); delayMicroseconds(600); pulseIR(460); delayMicroseconds(1680); pulseIR(500); delayMicroseconds(1680); pulseIR(500); delayMicroseconds(1660); pulseIR(540); delayMicroseconds(1640); pulseIR(480);
+// Send 18
+void Send18() {
+  int codes[400] = {
+    3000,3040,2940,4420,540,1640,520,560,540,1640,540,580,520,560,520,1660,520,1640,540,600,500,600,460,580,540,1640,540,600,500,1640,540,600,480,1640,540,620,480,600,460,620,500,600,500,600,480,620,440,640,500,580,520,560,520,600,460,640,560,520,500,620,480,600,460,620,520,580,560,520,500,620,440,1700,480,640,480,1660,500,600,540,1640,540,1640,480,1680,520,620,480,1640,540,1640,540,600,460,600,500,580,540,580,500,620,480,600,460,580,560,580,500,600,500,600,480,560,560,580,500,600,480,1640,540,620,440,600,520,600,520,600,480,600,460,600,480,600,540,580,520,600,460,600,500,580,540,580,500,620,440,600,500,620,520,580,500,600,500,560,520,580,520,600,500,600,460,600,500,620,500,580,520,600,480,560,500,600,540,580,500,620,480,560,520,580,540,580,500,620,460,620,440,600,540,580,520,600,480,600,500,600,500,560,520,620,480,600,460,600,540,580,500,600,480,620,480,600,480,600,520,580,500,620,440,640,500,560,540,1640,540,1620,500,1660,540,
+    99999
+  };
+  sendIR( codes, 400);
 }
+
+// Send 19
+void Send19() {
+  int codes[400] = {
+    3000,3020,3000,4340,600,1580,540,580,480,1700,500,580,500,600,520,1640,540,1640,500,600,540,560,520,580,500,1680,500,1660,520,1660,520,580,500,1660,540,600,460,620,480,600,520,580,500,620,440,600,540,560,540,580,500,620,440,640,480,580,540,580,500,600,460,640,540,520,520,580,520,600,480,620,460,1660,500,600,540,1640,540,540,560,1620,540,1640,560,1600,540,600,460,1680,520,1660,540,600,460,620,500,600,500,580,500,620,440,640,480,580,540,600,480,600,460,600,540,540,540,580,500,620,460,1680,520,600,480,580,540,580,500,580,480,600,520,560,520,620,500,600,480,620,440,640,500,580,520,600,480,600,480,580,480,640,520,600,480,600,460,620,520,580,500,620,460,620,440,600,500,640,500,560,520,620,440,600,540,580,520,600,480,600,460,640,440,600,540,580,520,600,460,640,460,580,540,560,520,620,440,640,460,620,520,580,500,620,440,600,520,600,500,600,500,600,460,620,460,640,500,580,520,600,480,560,520,1660,500,600,540,1640,540,1620,540,1620,560,
+    99999
+  };
+  sendIR( codes, 400);
+}
+
+// Send 20
+void Send20() {
+  int codes[400] = {
+    3000,3020,2960,4420,520,1640,520,620,500,1640,540,580,520,560,520,1660,520,1640,540,600,480,580,480,1680,500,640,500,580,520,1640,520,620,480,1640,540,580,500,600,460,600,540,580,520,600,480,600,460,600,540,580,500,580,520,600,460,620,500,560,540,560,520,580,480,640,500,580,520,580,500,600,460,1680,520,620,480,1660,480,620,520,1640,540,1640,520,1640,540,620,460,1660,520,1660,520,620,480,600,480,580,540,580,500,600,500,600,460,580,540,600,500,560,520,620,460,620,500,580,520,600,480,1640,540,600,460,600,500,620,500,620,480,600,460,620,460,600,540,560,520,620,440,640,480,600,520,560,520,620,440,600,480,600,540,560,540,600,480,580,500,580,540,580,520,600,460,620,480,580,540,580,500,620,460,620,460,620,520,580,500,600,480,580,520,560,540,580,520,560,520,600,460,600,540,580,500,620,480,600,480,580,500,580,540,600,500,600,460,580,560,580,500,600,480,580,500,620,480,580,540,580,500,1640,540,600,460,600,520,1660,480,1680,540,1620,520,
+    99999
+  };
+  sendIR( codes, 400);
+}
+
+ // Send 21
+void Send21() {
+  int codes[400] = {
+    3040,3040,2940,4420,520,1660,520,600,500,1640,540,580,520,600,480,1660,520,1640,540,580,500,620,460,1680,480,600,540,1640,520,1660,520,600,520,1640,480,640,500,560,520,580,500,620,480,580,540,580,500,580,480,600,500,600,520,600,500,580,480,600,500,600,520,580,520,560,500,620,460,600,540,580,520,1640,520,1660,520,1640,540,560,540,1640,540,580,500,1640,520,580,520,1640,540,1640,540,600,500,600,480,580,480,600,500,600,540,560,520,600,460,600,540,560,520,580,520,600,460,600,480,620,520,1640,540,580,500,580,520,560,520,580,540,580,500,580,500,620,440,640,500,560,540,600,480,600,480,580,540,560,540,580,500,600,460,600,540,560,520,620,480,600,460,600,540,580,500,580,500,620,440,600,520,580,540,600,480,600,460,600,540,580,500,580,520,560,500,600,500,620,500,580,520,600,460,620,500,560,540,580,500,620,460,620,480,580,540,560,520,600,460,640,480,580,520,580,520,600,480,600,480,1680,480,600,540,1640,520,580,520,1640,560,560,520,1640,500,
+    99999
+  };
+  sendIR( codes, 400);
+}
+
+// Send 22
+/*void Send22() {
+  int codes[400] = {
+    3000,3060,3000,4380,520,1660,540,600,460,1680,520,600,480,600,520,1640,540,1640,540,540,540,580,520,1620,560,1620,560,560,520,1640,540,600,460,1660,540,620,440,600,520,560,560,580,500,600,460,600,540,580,500,580,520,600,460,580,520,580,540,580,500,620,440,600,540,580,520,580,500,600,480,580,500,1680,560,520,540,1640,540,1640,520,600,520,580,500,1640,560,560,500,1640,520,1660,520,580,540,580,500,600,540,520,560,560,520,560,520,600,480,620,460,580,540,580,520,600,460,580,520,620,500,1640,520,560,540,580,520,600,460,600,520,560,540,580,500,620,440,600,520,580,540,580,500,600,460,640,480,580,520,580,520,600,480,620,460,620,500,600,500,600,460,620,480,580,540,580,500,620,480,600,440,640,520,580,500,620,460,580,500,580,540,580,520,600,480,600,460,640,500,580,500,620,480,600,480,580,540,580,500,620,480,600,460,580,540,580,520,600,480,620,440,600,540,580,500,600,500,600,460,1680,500,600,520,560,540,1640,540,580,520,580,500,1640,480,
+    99999
+  };
+  sendIR( codes, 400);
+}*/
+
+ // Send 23
+void Send23() {
+  int codes[400] = {
+    3000,3020,2960,4420,600,1580,500,580,540,1640,540,580,520,600,480,1660,520,1640,540,600,480,620,460,1660,580,1600,580,1600,540,1640,520,620,520,1600,540,600,480,600,520,580,500,620,440,600,520,580,540,580,500,580,500,620,440,600,540,580,520,600,480,560,520,580,540,580,520,560,520,600,460,620,520,1620,520,580,540,1640,540,1640,540,580,520,560,520,1620,520,580,540,1640,540,1640,540,580,520,600,480,560,500,620,460,600,540,600,480,620,440,600,540,600,500,600,480,620,440,640,460,620,520,1620,560,580,500,600,480,580,500,620,500,580,520,580,500,600,460,600,540,580,520,600,480,600,480,580,540,580,500,580,500,620,440,600,540,600,500,600,480,600,460,600,540,560,540,580,500,600,460,600,540,560,520,620,480,600,460,620,520,580,500,580,500,620,460,580,520,580,540,580,500,620,440,600,540,580,500,600,500,600,460,600,500,620,500,580,520,600,460,620,480,620,500,580,500,620,480,560,520,1660,500,580,560,1620,560,1620,520,580,540,580,500,1640,520,
+    99999
+  };
+  sendIR( codes, 400);
+}
+
+ // Send 24
+/*void Send24() {
+  int codes[400] = {
+    3000,3020,2960,4420,600,1580,500,580,540,1640,540,580,520,600,480,1660,520,1640,540,600,480,1660,520,600,460,600,540,580,520,1620,560,600,480,1640,540,600,480,620,440,600,540,580,520,600,480,600,460,640,500,580,500,620,480,600,460,620,520,580,500,620,460,620,440,600,540,580,520,540,540,600,460,1680,500,600,520,1660,480,1700,480,640,500,560,600,1560,540,600,480,1660,480,1700,480,600,540,560,540,600,480,580,520,600,480,600,520,580,500,600,460,640,460,580,540,580,520,580,500,620,440,1680,500,600,540,560,520,620,480,560,500,600,540,580,500,580,500,620,440,600,540,580,520,600,480,600,460,600,540,580,520,560,520,600,460,600,500,580,540,620,480,600,460,620,520,580,500,560,520,580,480,600,520,600,520,580,500,600,460,640,500,540,520,580,540,600,480,600,480,580,540,600,500,560,500,620,480,580,500,620,500,620,480,600,460,580,560,560,520,600,480,580,520,560,520,580,540,600,480,1660,520,1640,540,600,460,1680,520,620,440,600,500,1660,540,
+    99999
+  };
+  sendIR( codes, 400);
+}*/
+
+ // Send 25
+void Send25() {
+  int codes[400] = {
+    3000,3080,3040,4300,540,1640,540,580,480,1700,520,560,500,600,520,1660,520,1640,500,600,540,1640,540,560,520,580,520,1640,520,1660,520,580,500,1660,540,580,480,600,520,580,520,560,540,560,480,620,520,580,520,560,520,580,480,600,520,580,540,580,500,580,480,600,520,580,540,540,540,580,500,580,500,1680,480,600,540,1640,540,1640,520,580,540,1640,480,1680,520,580,480,1700,500,1680,520,560,500,600,540,540,540,560,520,580,480,600,580,520,540,580,500,580,480,600,540,560,520,560,540,560,500,1680,520,580,500,580,540,560,520,580,480,600,520,580,580,500,540,580,520,560,500,600,520,560,540,580,500,580,500,580,560,540,540,560,520,580,480,600,540,560,520,580,580,500,480,620,480,600,540,560,520,580,480,600,540,560,540,560,520,580,480,600,500,600,520,600,500,580,480,600,500,600,520,580,520,560,500,600,480,600,600,500,520,580,480,600,520,580,600,500,520,580,480,600,480,620,520,560,540,1640,540,1640,540,1640,540,1640,540,560,520,1640,520,1640,540,
+    99999
+  };
+  sendIR( codes, 400);
+}
+
+// Send On
+void SendOn() {
+  int codes[400] = {
+    3000,3040,2940,4420,600,1580,520,600,500,1640,560,560,520,600,480,1660,520,1640,540,620,460,1660,540,600,440,640,520,1620,540,1640,520,600,520,1640,540,540,540,580,520,600,460,620,500,580,520,600,480,620,500,540,560,520,560,580,500,600,520,580,480,560,540,600,500,600,520,520,580,520,540,580,500,1640,540,620,540,1600,520,1640,540,600,520,1600,540,1640,580,500,540,1640,540,1640,540,580,520,600,560,520,480,620,520,560,520,580,500,600,520,540,540,540,540,620,480,600,460,580,500,600,540,1640,540,580,500,620,460,580,520,580,540,580,500,580,500,620,520,520,540,580,520,600,480,600,480,620,500,580,500,580,520,600,520,540,540,540,540,600,500,600,460,620,520,560,520,580,500,620,500,540,540,580,520,600,480,600,460,600,540,580,500,580,520,600,520,520,520,620,500,580,500,620,440,600,540,580,520,580,500,600,460,600,520,600,520,560,520,600,460,600,520,1660,500,620,480,1640,540,1640,540,600,460,600,520,560,540,580,520,600,440,640,460,640,460,
+    99999
+  };
+  sendIR( codes, 400);
+}
+
+// Send Heat
+void SendHeat() {
+  int codes[400] = {
+    3000,3040,2940,4420,540,1640,520,580,540,1640,540,580,500,620,460,1660,520,1640,560,600,480,1660,520,600,460,640,500,1640,540,1640,500,580,540,1640,500,580,560,560,520,600,460,640,500,540,540,620,480,600,460,620,460,640,500,580,500,620,440,640,480,580,540,580,500,600,460,640,440,600,540,600,500,1640,540,600,480,1660,520,1640,540,1640,540,580,500,620,440,600,540,1640,520,1660,500,600,540,580,500,580,500,620,480,600,500,560,540,600,480,620,440,600,540,580,520,600,480,600,480,620,480,1660,500,620,500,600,500,600,460,600,500,580,540,580,500,620,480,600,460,600,540,580,500,620,440,600,520,580,520,600,500,600,480,600,460,600,540,580,520,600,480,600,480,580,540,580,500,620,480,600,460,620,520,560,520,600,480,620,440,600,540,580,520,580,500,600,460,600,540,560,520,580,520,600,460,620,520,580,500,580,520,600,460,580,520,580,540,600,480,620,440,1700,480,1660,560,600,460,1680,500,620,480,580,540,580,500,620,440,600,520,1660,520,600,460,
+    99999
+  };
+  sendIR( codes, 400);
+}
+
+ // Send Soft On
+void SendSoftOn() {
+  int codes[400] = {
+    //3000,3060,3000,4380,520,1660,520,620,520,1620,520,600,540,520,540,1620,560,1620,560,580,500,580,500,1660,520,620,480,1640,540,1640,540,600,520,1600,540,620,500,580,480,580,540,600,480,600,460,600,540,540,540,580,520,600,520,560,480,620,500,580,500,620,520,520,540,580,520,580,500,600,480,620,480,1660,560,1620,560,1620,560,560,480,1660,580,1600,520,1640,540,580,520,1620,540,1640,540,600,500,600,520,520,560,580,480,580,540,1620,560,600,480,600,460,600,540,580,500,620,460,620,480,600,500,1640,600,520,520,580,500,620,520,520,540,560,540,580,500,600,480,580,500,580,540,580,520,600,460,580,520,580,540,580,500,620,480,600,480,620,500,580,500,600,460,640,480,560,560,580,500,600,480,620,440,640,500,580,520,600,480,600,480,580,540,580,500,620,480,600,460,620,520,540,540,600,500,600,440,600,540,600,500,580,500,620,440,600,540,560,540,600,480,1640,540,600,520,580,440,600,540,1640,540,1640,520,580,540,1620,560,1620,560,1620,540,1640,520,1640,540,
+    3060,3060,3000,4380,520,1640,540,620,520,1620,520,600,480,580,540,1620,560,1620,560,580,500,580,500,1640,540,1640,540,1640,540,1640,540,580,500,1640,520,580,540,620,460,620,460,580,540,580,520,1640,540,1640,540,580,500,600,480,580,500,600,520,600,500,600,460,620,480,620,500,580,520,600,480,600,480,1660,560,1620,560,540,500,620,500,600,480,580,520,600,480,580,540,1620,560,1640,540,540,540,620,480,600,460,580,500,600,540,1640,540,580,500,620,460,620,480,600,520,580,500,580,500,620,440,1700,480,640,480,600,520,600,480,620,440,600,540,580,500,560,540,600,460,580,520,620,500,580,520,600,460,620,500,560,500,600,520,620,460,620,480,580,520,600,500,600,460,640,460,620,480,580,540,560,520,600,480,580,540,580,500,620,440,600,520,580,500,1660,520,620,440,600,540,580,520,600,480,620,440,600,540,560,520,600,500,600,460,600,540,580,500,620,480,1640,540,600,440,640,460,600,540,1640,540,1620,520,1680,500,1680,480,640,500,1640,540,560,500,1660,520,
+    99999
+  };
+  sendIR( codes, 400);
+}
+
+ // Send Soft Off
+void SendSoftOff() {
+  int codes[400] = {
+    //3000,3080,2980,4380,540,1640,540,600,520,1620,520,600,480,620,500,1640,540,1640,560,560,520,560,520,1640,540,600,480,1660,520,1640,540,620,500,1620,540,600,520,560,480,580,540,580,500,620,440,600,540,560,540,540,540,600,460,600,500,580,540,580,520,600,460,620,480,620,500,580,520,600,480,560,520,1660,560,1620,560,1620,560,520,520,1660,520,1660,520,1640,540,600,500,1640,540,1640,540,580,500,620,440,600,540,580,480,580,540,600,480,580,500,580,540,580,520,600,460,620,480,580,520,600,500,1640,540,620,480,600,460,600,540,580,500,600,480,620,480,600,480,600,520,580,500,620,440,640,500,560,520,620,480,600,480,620,460,580,540,580,520,600,460,580,520,580,540,600,480,580,520,600,480,580,540,580,500,600,460,600,520,560,540,580,520,580,500,620,440,600,540,580,500,620,480,560,520,580,540,580,500,580,520,600,460,600,540,580,500,600,480,620,460,1680,480,600,540,600,500,560,520,600,460,1680,520,580,520,1660,480,1700,480,1700,480,1680,540,1620,500,
+    3060,3060,3000,4340,560,1640,540,620,520,1620,500,620,480,600,500,1640,560,1620,560,540,540,580,500,1640,540,1640,540,1640,540,1640,540,580,520,1620,520,600,520,600,480,620,460,580,540,580,500,1660,540,1640,540,580,500,600,480,580,520,560,540,580,500,620,460,620,480,620,500,580,500,620,480,600,480,1660,500,1680,560,540,500,580,540,620,460,600,500,600,480,580,540,1620,560,1620,560,580,500,620,460,620,440,600,500,640,500,580,500,620,440,600,520,580,540,580,500,600,460,600,480,600,540,1640,540,580,520,600,480,600,460,600,540,580,500,580,520,600,460,620,520,540,540,620,460,620,440,620,520,600,500,580,500,600,460,640,480,580,540,600,480,600,460,600,540,580,500,580,520,600,460,640,460,580,540,580,500,620,440,600,540,560,540,580,500,1640,480,600,540,600,500,600,480,560,520,580,540,580,500,580,520,600,460,640,500,580,500,620,460,580,520,1660,480,600,540,600,500,560,520,620,440,1700,500,1680,500,1660,540,600,440,1700,500,580,520,1640,540,
+    99999
+  };
+  sendIR( codes, 400);
+}
+
+
+void sendIR( int codes[], int size ) {
+  int b = 0;
+  for (int i=0;i<size;i=i+2)
+  {
+    if ( codes[i] != 99999 )
+    {
+      pulseIR(codes[i]);
+    }
+
+    if ( codes[i+1] != 99999 )
+    {
+      delayMicroseconds(codes[i+1]);
+    }
+
+  }
+
+}
+
